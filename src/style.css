@@ -1,0 +1,7 @@
+body { 
+    margin: 0;
+    background-color: hsl(199, 26%, 21%);
+    display: flex;
+    justify-content: center; /* horizontal */
+    align-items: center; /* vertical */
+}
