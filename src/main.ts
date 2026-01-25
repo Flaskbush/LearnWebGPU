@@ -1,5 +1,6 @@
 // import triangleWGSL from './shaders/triangle.wgsl?raw';
 import shader from "./shader.wgsl?raw"
+import { TriangleMesh } from "./triangle_mesh";
 
 const Initialize = async() => {
   
@@ -12,18 +13,32 @@ const Initialize = async() => {
   
   context.configure({
     device: device,
-    format: format
+    format: format,
+    alphaMode: "opaque"
+  });
+
+  const triangleMesh = new TriangleMesh(device);
+
+  const bindGroupLayout = device.createBindGroupLayout({
+    entries: [],
+  });
+
+  const bindGroup = device.createBindGroup({
+    layout: bindGroupLayout,
+    entries: []
+  });
+
+  const pipelineLayout = device.createPipelineLayout({
+    bindGroupLayouts: [bindGroupLayout],
   });
 
   const pipeline : GPURenderPipeline = device.createRenderPipeline({
-
-    layout : "auto",
-
     vertex : {
       module : device.createShaderModule({
         code : shader
       }),
-      entryPoint : "vs_main"
+      entryPoint : "vs_main",
+      buffers: [triangleMesh.bufferLayout,]
     },
 
     fragment : {
@@ -38,7 +53,9 @@ const Initialize = async() => {
 
     primitive : {
       topology : "triangle-list"
-    }
+    },
+
+    layout: pipelineLayout
 
   });
 
@@ -54,6 +71,8 @@ const Initialize = async() => {
   });
 
   renderpass.setPipeline(pipeline);
+  renderpass.setBindGroup(0, bindGroup);
+  renderpass.setVertexBuffer(0, triangleMesh.buffer);
   renderpass.draw(3, 1, 0, 0);
   renderpass.end();
 
