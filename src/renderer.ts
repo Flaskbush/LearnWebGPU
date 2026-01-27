@@ -7,20 +7,20 @@ export class Renderer {
     canvas: HTMLCanvasElement
 
     // GPU objects
-    adapter: GPUAdapter;
-    device: GPUDevice;
-    context: GPUCanvasContext;
-    format: GPUTextureFormat;
+    adapter!: GPUAdapter;
+    device!: GPUDevice;
+    context!: GPUCanvasContext;
+    format!: GPUTextureFormat;
 
     // Pipeline objects
-    uniformBuffer: GPUBuffer;
-    bindGroup: GPUBindGroup;
-    pipeline: GPURenderPipeline;
+    uniformBuffer!: GPUBuffer;
+    bindGroup!: GPUBindGroup;
+    pipeline!: GPURenderPipeline;
 
     // Meshes / Assets
-    triangleMesh: TriangleMesh
+    triangleMesh!: TriangleMesh
 
-    // ???
+    // time-based angle
     t: number = 0.0;
 
     constructor(canvas: HTMLCanvasElement) {
@@ -141,8 +141,9 @@ export class Renderer {
         mat4.rotate(model, model, this.t, [0,0,1]);
 
         this.device.queue.writeBuffer(this.uniformBuffer, 0, <ArrayBuffer>(<unknown>model));
-        this.device.queue.writeBuffer(this.uniformBuffer, 64, <ArrayBuffer>(<unknown>view)); 
+        this.device.queue.writeBuffer(this.uniformBuffer, 64, <ArrayBuffer>(<unknown>view));
         this.device.queue.writeBuffer(this.uniformBuffer, 128, <ArrayBuffer>(<unknown>projection));
+
 
         const commandEncoder : GPUCommandEncoder = this.device.createCommandEncoder();
 
@@ -151,7 +152,7 @@ export class Renderer {
         const renderpass : GPURenderPassEncoder = commandEncoder.beginRenderPass({
             colorAttachments: [{
                 view: textureView,
-                clearValue: {r: 0.5, g: 0.0, b: 0.25, a: 1.0},
+                clearValue: {r: 0.5, g: 0.7, b: 0.25, a: 1.0},
                 loadOp: "clear",
                 storeOp: "store"
             }]
