@@ -5,12 +5,12 @@ export class TriangleMesh {
 
     constructor(device: GPUDevice) {
 
-        // x, y, z, r, g, b
+        // x, y, z, u, v
         const vertices: Float32Array = new Float32Array(
             [
-                0.0, 0.0, 0.5, 1.0, 0.0, 0.0,
-                0.0, -0.5, -0.5, 0.0, 1.0, 0.0,
-                0.0, 0.5, -0.5, 0.0, 0.0, 1.0
+                0.0,  0.0,  0.5, 0.5, 0.0,
+                0.0, -0.5, -0.5, 0.0, 1.0,
+                0.0,  0.5, -0.5, 1.0, 1.0
             ]
         )
 
@@ -28,7 +28,7 @@ export class TriangleMesh {
         this.buffer.unmap();
 
         this.bufferLayout = {
-            arrayStride: 24,
+            arrayStride: 20,
             attributes: [
                 // shader postion
                 {
@@ -39,7 +39,7 @@ export class TriangleMesh {
                 //shader color
                 {
                     shaderLocation: 1,
-                    format: "float32x3",
+                    format: "float32x2",
                     offset: 12
                 },
             ]

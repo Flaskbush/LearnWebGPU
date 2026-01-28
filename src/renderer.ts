@@ -1,6 +1,7 @@
 import shader from "./shaders/shader.wgsl?raw"
 import { TriangleMesh } from "./triangle_mesh"
 import { mat4} from "gl-matrix"
+import { Material } from "./material"
 
 export class Renderer {
 
@@ -18,7 +19,8 @@ export class Renderer {
     pipeline!: GPURenderPipeline;
 
     // Meshes / Assets
-    triangleMesh!: TriangleMesh
+    triangleMesh!: TriangleMesh;
+    material!: Material;
 
     // time-based angle
     t: number = 0.0;
@@ -32,7 +34,7 @@ export class Renderer {
         
         await this.setupDevice();
 
-        this.createAssets();
+        await this.createAssets();
 
         await this.makePipeLine();
 
@@ -47,6 +49,7 @@ export class Renderer {
 
         this.context = <GPUCanvasContext> this.canvas.getContext("webgpu");
         this.format = navigator.gpu.getPreferredCanvasFormat();
+        console.log("Using format: " + this.format);
 
         this.context.configure({
             device: this.device,
@@ -68,6 +71,16 @@ export class Renderer {
                     binding: 0,
                     visibility: GPUShaderStage.VERTEX,
                     buffer: {}
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {}
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    sampler: {}
                 }
             ]
         });
@@ -80,6 +93,14 @@ export class Renderer {
                     resource: {
                         buffer : this.uniformBuffer
                     }
+                },
+                {
+                    binding: 1,
+                    resource: this.material.view
+                },
+                {
+                    binding: 2,
+                    resource: this.material.sampler
                 }
             ]
         });
@@ -116,8 +137,11 @@ export class Renderer {
 
     }
 
-    createAssets() {
+    async createAssets() {
         this.triangleMesh = new TriangleMesh(this.device);
+        this.material = new Material();
+
+        await this.material.initialize(this.device, "dist/textures/wood.png");
     }
 
     render = () => {
@@ -130,10 +154,12 @@ export class Renderer {
         // make transforms
         const projection = mat4.create();
 
+        // FOV / aspect / near-far
         mat4.perspective(projection, Math.PI/4, 800/600, 0.1, 10);
 
         const view = mat4.create();
 
+        // eye / center / up
         mat4.lookAt(view, [-2, 0, 2], [0, 0, 0], [0, 0, 1]);
 
         const model = mat4.create();
